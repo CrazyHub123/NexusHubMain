@@ -1,7 +1,9 @@
 if game.PlaceId == 16914149804 then
   loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/AnimeSwordsX"))()
+  return
 elseif game.PlaceId == 16733754732 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/AnimeIslands"))()
+  return
 end
 
 -- This file was generated using Luraph Obfuscator v13.8.1

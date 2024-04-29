@@ -11,6 +11,8 @@ elseif Place == 16510724413 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/PetCatchers.lua"))()
 elseif Place == 15776923116 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/AnimePunchSimulator.lua"))()
+elseif Place == 6897167394 then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/DemonPiece.lua"))()
 elseif Place == 15049111150 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/SecondPiece.lua"))()
 elseif Place == 12135640403 then

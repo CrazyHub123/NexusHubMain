@@ -1939,7 +1939,7 @@ Components.Tab = (function()
                 Size = UDim2.fromOffset(16, 16),
                 Position = UDim2.new(0, 8, 0.5, 0),
                 BackgroundTransparency = 1,
-                Image = Icon and Icon or nil,
+                Image = Icon and Icon or "rbxassetid://"..Icon or nil,
                 ThemeTag = {
                     ImageColor3 = "Text",
                 },

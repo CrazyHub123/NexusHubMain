@@ -26,4 +26,6 @@ elseif Place == 14752086859 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/AnimeMaxSimulator.lua"))()
 elseif Place == 15705682243 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/TappingLegendsFinal.lua"))()
+elseif Place == 16741537517 then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/CrazyHub123/NexusHubMain/main/AnimeHeroes.lua"))()
 end

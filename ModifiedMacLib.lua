@@ -1,4 +1,3 @@
-function Library()
     local MacLib = {}
 
     --// Services
@@ -3208,4 +3207,3 @@ function Library()
     end
     
     return MacLib
-end

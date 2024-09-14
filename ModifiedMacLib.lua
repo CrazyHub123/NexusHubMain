@@ -1,6 +1,7 @@
     local MacLib = {}
 
     --// Services
+    local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
     local HttpService = game:GetService("HttpService")
     local ContentProvider = game:GetService("ContentProvider")
@@ -19,9 +20,16 @@
     local currentTabInstance = nil
     local tabIndex = 0
     
+    local assets = {
+        userInfoBlurred = "rbxassetid://18824089198",
+        toggleBackground = "rbxassetid://18772190202",
+        togglerHead = "rbxassetid://18772309008",
+        buttonImage = "rbxassetid://10709791437"
+    }
+    
     --// Functions
     local function Tween(instance, tweeninfo, propertytable)
-        return game:GetService("TweenService"):Create(instance, tweeninfo, propertytable)
+        return TweenService:Create(instance, tweeninfo, propertytable)
     end
     
     --// Library Functions
@@ -35,6 +43,7 @@
     
         local macLib = Instance.new("ScreenGui")
         macLib.Name = "MacLib"
+        macLib.ResetOnSpawn = false
         macLib.DisplayOrder = 100
         macLib.IgnoreGuiInset = true
         macLib.ScreenInsets = Enum.ScreenInsets.None
@@ -642,6 +651,7 @@
         moveIcon.Position = UDim2.fromScale(1, 0.5)
         moveIcon.Size = UDim2.fromOffset(15, 15)
         moveIcon.Parent = elements
+        moveIcon.Visible = not Settings.DragStyle or Settings.DragStyle == 1
     
         local function ChangemoveIconState(State)
             if State == "Default" then
@@ -692,24 +702,47 @@
             end
         end
     
-        moveIcon.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                onDragStart(input)
-            end
-        end)
+        if not Settings.DragStyle or Settings.DragStyle == 1 then
+            moveIcon.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    onDragStart(input)
+                end
+            end)
     
-        moveIcon.InputChanged:Connect(onDragUpdate)
+            moveIcon.InputChanged:Connect(onDragUpdate)
     
-        UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging_ then
-                update(input)
-            end
-        end)
+            UserInputService.InputChanged:Connect(function(input)
+                if input == dragInput and dragging_ then
+                    update(input)
+                end
+            end)
     
-        moveIcon.MouseButton1Up:Connect(function()
-            dragging_ = false
-        end)
+            moveIcon.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging_ = false
+                end
+            end)
+        elseif Settings.DragStyle == 2 then
+            base.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    onDragStart(input)
+                end
+            end)
     
+            base.InputChanged:Connect(onDragUpdate)
+    
+            UserInputService.InputChanged:Connect(function(input)
+                if input == dragInput and dragging_ then
+                    update(input)
+                end
+            end)
+    
+            base.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging_ = false
+                end
+            end)
+        end
     
         local currentTab = Instance.new("TextLabel")
         currentTab.Name = "CurrentTab"
@@ -827,7 +860,6 @@
     
         local BlurTarget = base
     
-        local RunService = game:GetService('RunService')
         local HS = game:GetService('HttpService')
         local camera = workspace.CurrentCamera
         local MTREL = "Glass"
@@ -1257,7 +1289,6 @@
                 tabSwitcher.TextColor3 = Color3.fromRGB(0, 0, 0)
                 tabSwitcher.TextSize = 14
                 tabSwitcher.AutoButtonColor = false
-                tabSwitcher.Modal = true
                 tabSwitcher.AnchorPoint = Vector2.new(0.5, 0)
                 tabSwitcher.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 tabSwitcher.BackgroundTransparency = 1
@@ -1456,7 +1487,7 @@
                         local ButtonFunctions = {}
                         local button = Instance.new("Frame")
                         button.Name = "Button"
-                        button.AutomaticSize = Enum.AutomaticSize.XY
+                        button.AutomaticSize = Enum.AutomaticSize.Y
                         button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         button.BackgroundTransparency = 1
                         button.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -1540,6 +1571,9 @@
                         function ButtonFunctions:UpdateName(Name)
                             buttonInteract.Text = Name
                         end
+                        function ButtonFunctions:SetVisibility(State)
+                            button.Visible = State
+                        end
                         return ButtonFunctions
                     end
     
@@ -1547,7 +1581,7 @@
                         local ToggleFunctions = {}
                         local toggle = Instance.new("Frame")
                         toggle.Name = "Toggle"
-                        toggle.AutomaticSize = Enum.AutomaticSize.XY
+                        toggle.AutomaticSize = Enum.AutomaticSize.Y
                         toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         toggle.BackgroundTransparency = 1
                         toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -1684,6 +1718,9 @@
                         function ToggleFunctions:UpdateName(Name)
                             toggleName.Text = Name
                         end
+                        function ToggleFunctions:SetVisibility(State)
+                            toggle.Visible = State
+                        end
                         return ToggleFunctions
                     end
     
@@ -1691,7 +1728,7 @@
                         local SliderFunctions = {}
                         local slider = Instance.new("Frame")
                         slider.Name = "Slider"
-                        slider.AutomaticSize = Enum.AutomaticSize.XY
+                        slider.AutomaticSize = Enum.AutomaticSize.Y
                         slider.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         slider.BackgroundTransparency = 1
                         slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -1901,7 +1938,7 @@
                             end
                         end)
     
-                        game:GetService("UserInputService").InputChanged:Connect(function(input)
+                        UserInputService.InputChanged:Connect(function(input)
                             if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                                 SetValue(input)
                             end
@@ -1925,6 +1962,9 @@
                         function SliderFunctions:UpdateName(Name)
                             sliderName = Name
                         end
+                        function SliderFunctions:SetVisibility(State)
+                            slider.Visible = State
+                        end
                         function SliderFunctions:UpdateValue(Value)
                             SetValue(Value)
                         end
@@ -1938,7 +1978,7 @@
                         local InputFunctions = {}
                         local input = Instance.new("Frame")
                         input.Name = "Input"
-                        input.AutomaticSize = Enum.AutomaticSize.XY
+                        input.AutomaticSize = Enum.AutomaticSize.Y
                         input.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         input.BackgroundTransparency = 1
                         input.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -2069,10 +2109,16 @@
     
                         InputBox:GetPropertyChangedSignal("Text"):Connect(function()
                             InputBox.Text = AcceptedCharacters(InputBox.Text)
+                            if Settings.onChanged then
+                                Settings.onChanged(InputBox.Text)
+                            end
                         end)
     
                         function InputFunctions:UpdateName(Name)
                             inputName.Text = Name
+                        end
+                        function InputFunctions:SetVisibility(State)
+                            input.Visible = State
                         end
                         function InputFunctions:GetInput()
                             return InputBox.Text
@@ -2090,7 +2136,7 @@
                         local KeybindFunctions = {}
                         local keybind = Instance.new("Frame")
                         keybind.Name = "Keybind"
-                        keybind.AutomaticSize = Enum.AutomaticSize.XY
+                        keybind.AutomaticSize = Enum.AutomaticSize.Y
                         keybind.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         keybind.BackgroundTransparency = 1
                         keybind.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -2182,13 +2228,16 @@
                         binderBox.FocusLost:Connect(function()
                             focused = false
                         end)
-    
+                    
                         UserInputService.InputEnded:Connect(function(inp)
                             if macLib ~= nil then
                                 if focused and inp.KeyCode.Name ~= "Unknown" then
                                     binded = inp.KeyCode
                                     binderBox.Text = inp.KeyCode.Name
                                     binderBox:ReleaseFocus()
+                                    if Settings.onBinded then
+                                        Settings.onBinded(binded)
+                                    end
                                 elseif inp.KeyCode == binded then
                                     if Settings.Callback then
                                         Settings.Callback(binded)
@@ -2210,6 +2259,9 @@
                         function KeybindFunctions:UpdateName(Name)
                             keybindName = Name
                         end
+                        function KeybindFunctions:SetVisibility(State)
+                            keybind.Visible = State
+                        end
                         return KeybindFunctions
                     end
     
@@ -2217,7 +2269,7 @@
                         local DropdownFunctions = {}
                         local Selected = {}
                         local OptionObjs = {}
-                    
+    
                         local dropdown = Instance.new("Frame")
                         dropdown.Name = "Dropdown"
                         dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2226,7 +2278,8 @@
                         dropdown.BorderSizePixel = 0
                         dropdown.Size = UDim2.new(1, 0, 0, 38)
                         dropdown.Parent = section
-                    
+                        dropdown.ClipsDescendants = true
+    
                         local interact = Instance.new("TextButton")
                         interact.Name = "Interact"
                         interact.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
@@ -2239,7 +2292,7 @@
                         interact.BorderSizePixel = 0
                         interact.Size = UDim2.new(1, 0, 0, 38)
                         interact.Parent = dropdown
-                    
+    
                         local dropdownName = Instance.new("TextLabel")
                         dropdownName.Name = "DropdownName"
                         dropdownName.FontFace = Font.new(
@@ -2248,6 +2301,7 @@
                             Enum.FontStyle.Normal
                         )
                         dropdownName.Text = Settings.Name
+                        dropdownName.RichText = true
                         dropdownName.TextColor3 = Color3.fromRGB(255, 255, 255)
                         dropdownName.TextSize = 13
                         dropdownName.TextTransparency = 0.5
@@ -2260,19 +2314,19 @@
                         dropdownName.BorderSizePixel = 0
                         dropdownName.Size = UDim2.new(1, -20, 0, 38)
                         dropdownName.Parent = dropdown
-                    
+    
                         local dropdownUIStroke = Instance.new("UIStroke")
                         dropdownUIStroke.Name = "DropdownUIStroke"
                         dropdownUIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                         dropdownUIStroke.Color = Color3.fromRGB(255, 255, 255)
                         dropdownUIStroke.Transparency = 0.95
                         dropdownUIStroke.Parent = dropdown
-                    
+    
                         local dropdownUICorner = Instance.new("UICorner")
                         dropdownUICorner.Name = "DropdownUICorner"
                         dropdownUICorner.CornerRadius = UDim.new(0, 6)
                         dropdownUICorner.Parent = dropdown
-                    
+    
                         local dropdownImage = Instance.new("ImageLabel")
                         dropdownImage.Name = "DropdownImage"
                         dropdownImage.Image = "rbxassetid://18865373378"
@@ -2285,7 +2339,7 @@
                         dropdownImage.Position = UDim2.new(1, 0, 0, 12)
                         dropdownImage.Size = UDim2.fromOffset(14, 14)
                         dropdownImage.Parent = dropdown
-                    
+    
                         local dropdownFrame = Instance.new("Frame")
                         dropdownFrame.Name = "DropdownFrame"
                         dropdownFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -2295,67 +2349,169 @@
                         dropdownFrame.ClipsDescendants = true
                         dropdownFrame.Size = UDim2.fromScale(1, 1)
                         dropdownFrame.Visible = false
-
+                        dropdownFrame.AutomaticSize = Enum.AutomaticSize.Y
+    
                         local dropdownFrameUIPadding = Instance.new("UIPadding")
                         dropdownFrameUIPadding.Name = "DropdownFrameUIPadding"
-                        dropdownFrameUIPadding.PaddingBottom = UDim.new(0, 15)
+                        dropdownFrameUIPadding.PaddingBottom = UDim.new(0, 8)
                         dropdownFrameUIPadding.PaddingTop = UDim.new(0, 38)
                         dropdownFrameUIPadding.Parent = dropdownFrame
-                    
+    
                         local dropdownFrameUIListLayout = Instance.new("UIListLayout")
                         dropdownFrameUIListLayout.Name = "DropdownFrameUIListLayout"
-                        dropdownFrameUIListLayout.Padding = UDim.new(0, 3)
+                        dropdownFrameUIListLayout.Padding = UDim.new(0, 5)
                         dropdownFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
                         dropdownFrameUIListLayout.Parent = dropdownFrame
-
-                        local searchbar = Instance.new("TextBox")
-                        searchbar.Name = "SearchBar"
-                        searchbar.FontFace = Font.new(
+                        
+                        local search = Instance.new("Frame")
+                        search.Name = "Search"
+                        search.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        search.BackgroundTransparency = 0.95
+                        search.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                        search.BorderSizePixel = 0
+                        search.LayoutOrder = -1
+                        search.Size = UDim2.new(1, 0, 0, 30)
+                        search.Parent = dropdownFrame
+                        search.Visible = Settings.Search
+    
+                        local sectionUICorner = Instance.new("UICorner")
+                        sectionUICorner.Name = "SectionUICorner"
+                        sectionUICorner.Parent = search
+    
+                        local searchIcon = Instance.new("ImageLabel")
+                        searchIcon.Name = "SearchIcon"
+                        searchIcon.Image = "rbxassetid://86737463322606"
+                        searchIcon.ImageColor3 = Color3.fromRGB(180, 180, 180)
+                        searchIcon.AnchorPoint = Vector2.new(0, 0.5)
+                        searchIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        searchIcon.BackgroundTransparency = 1
+                        searchIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                        searchIcon.BorderSizePixel = 0
+                        searchIcon.Position = UDim2.fromScale(0, 0.5)
+                        searchIcon.Size = UDim2.fromOffset(12, 12)
+                        searchIcon.Parent = search
+    
+                        local uIPadding = Instance.new("UIPadding")
+                        uIPadding.Name = "UIPadding"
+                        uIPadding.PaddingLeft = UDim.new(0, 15)
+                        uIPadding.Parent = search
+    
+                        local searchBox = Instance.new("TextBox")
+                        searchBox.Name = "SearchBox"
+                        searchBox.CursorPosition = -1
+                        searchBox.FontFace = Font.new(
                             "rbxassetid://12187365364",
                             Enum.FontWeight.Medium,
                             Enum.FontStyle.Normal
                         )
-                        searchbar.Text = ""
-                        searchbar.PlaceholderText = "Search..."
-                        searchbar.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        searchbar.TextSize = 14
-                        searchbar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        searchbar.BackgroundTransparency = 1
-                        searchbar.BorderColor3 = Color3.fromRGB(0, 0, 0)
-                        searchbar.BorderSizePixel = 0
-                        searchbar.Size = UDim2.new(1, 0, 0, 30)  -- Adjust search bar height
-                        searchbar.Parent = dropdownFrame
-                        searchbar.TextXAlignment = Enum.TextXAlignment.Left
-                        searchbar.Position = UDim2.new(0, 0, 0, 0)
-
-                        searchbar:GetPropertyChangedSignal('Text'):Connect(function()
-                            local InputText = searchbar.Text:lower()
+                        searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+                        searchBox.PlaceholderText = "Search..."
+                        searchBox.Text = ""
+                        searchBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+                        searchBox.TextSize = 14
+                        searchBox.TextXAlignment = Enum.TextXAlignment.Left
+                        searchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        searchBox.BackgroundTransparency = 1
+                        searchBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                        searchBox.BorderSizePixel = 0
+                        searchBox.Size = UDim2.fromScale(1, 1)
                         
-                            -- Iterate over all children of dropdownFrame
-                            for _, child in ipairs(dropdownFrame:GetChildren()) do
-                                if child:IsA("TextButton") then
-                                    local show = false
-                        
-                                    -- Iterate over children of each TextButton to find TextLabel
-                                    for _, label in ipairs(child:GetChildren()) do
-                                        if label:IsA("TextLabel") then
-                                            local elementName = label.Text:lower()
-                        
-                                            -- Determine if this TextLabel should be visible based on search input
-                                            if InputText == "" or string.find(elementName, InputText, 1, true) then
-                                                show = true
-                                                break  -- Exit the inner loop if a match is found
-                                            end
-                                        end
-                                    end
-                        
-                                    -- Set the visibility of the TextButton based on the show flag
-                                    child.Visible = show
+                        local function findOption()
+                            local searchTerm = searchBox.Text:lower()
+    
+                            for _, v in pairs(OptionObjs) do
+                                local optionText = v.NameLabel.Text:lower()
+                                local isVisible = string.find(optionText, searchTerm) ~= nil
+    
+                                if v.Button.Visible ~= isVisible then
+                                    v.Button.Visible = isVisible
                                 end
                             end
-                        end)
+                        end
+    
+                        searchBox:GetPropertyChangedSignal("Text"):Connect(findOption)
+    
+    
+                        local uIPadding1 = Instance.new("UIPadding")
+                        uIPadding1.Name = "UIPadding"
+                        uIPadding1.PaddingLeft = UDim.new(0, 23)
+                        uIPadding1.Parent = searchBox
+    
+                        searchBox.Parent = search
                         
-            
+                        local tweensettings = {
+                            duration = 0.2,
+                            easingStyle = Enum.EasingStyle.Quint,
+                            transparencyIn = 0.2,
+                            transparencyOut = 0.5,
+                            checkSizeIncrease = 12,
+                            checkSizeDecrease = -13,
+                            waitTime = 1
+                        }
+                        
+                        local function Toggle(optionName, State)
+                            local option = OptionObjs[optionName]
+    
+                            if not option then return end
+    
+                            local checkmark = option.Checkmark
+                            local optionNameLabel = option.NameLabel
+    
+                            if State then
+                                if Settings.Multi then
+                                    if not table.find(Selected, optionName) then
+                                        table.insert(Selected, optionName)
+                                    end
+                                else
+                                    for name, opt in pairs(OptionObjs) do
+                                        if name ~= optionName then
+                                            Tween(opt.Checkmark, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                                Size = UDim2.new(opt.Checkmark.Size.X.Scale, tweensettings.checkSizeDecrease, opt.Checkmark.Size.Y.Scale, opt.Checkmark.Size.Y.Offset)
+                                            }):Play()
+                                            Tween(opt.NameLabel, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                                TextTransparency = tweensettings.transparencyOut
+                                            }):Play()
+                                            opt.Checkmark.TextTransparency = 1
+                                        end
+                                    end
+                                    Selected = {optionName}
+                                end
+                                Tween(checkmark, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                    Size = UDim2.new(checkmark.Size.X.Scale, tweensettings.checkSizeIncrease, checkmark.Size.Y.Scale, checkmark.Size.Y.Offset)
+                                }):Play()
+                                Tween(optionNameLabel, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                    TextTransparency = tweensettings.transparencyIn
+                                }):Play()
+                                checkmark.TextTransparency = 0
+                            else
+                                if Settings.Multi then
+                                    local idx = table.find(Selected, optionName)
+                                    if idx then
+                                        table.remove(Selected, idx)
+                                    end
+                                else
+                                    Selected = {}
+                                end
+                                Tween(checkmark, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                    Size = UDim2.new(checkmark.Size.X.Scale, tweensettings.checkSizeDecrease, checkmark.Size.Y.Scale, checkmark.Size.Y.Offset)
+                                }):Play()
+                                Tween(optionNameLabel, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
+                                    TextTransparency = tweensettings.transparencyOut
+                                }):Play()
+                                checkmark.TextTransparency = 1
+                            end
+    
+                            if Settings.Required and #Selected == 0 and not State then
+                                return
+                            end
+    
+                            if #Selected > 0 then
+                                dropdownName.Text = Settings.Name .. " • " .. table.concat(Selected, ", ")
+                            else
+                                dropdownName.Text = Settings.Name
+                            end
+                        end
+    
                         for i, v in pairs(Settings.Options) do
                             local option = Instance.new("TextButton")
                             option.Name = "Option"
@@ -2368,12 +2524,12 @@
                             option.BorderColor3 = Color3.fromRGB(0, 0, 0)
                             option.BorderSizePixel = 0
                             option.Size = UDim2.new(1, 0, 0, 30)
-
+    
                             local optionUIPadding = Instance.new("UIPadding")
                             optionUIPadding.Name = "OptionUIPadding"
                             optionUIPadding.PaddingLeft = UDim.new(0, 15)
                             optionUIPadding.Parent = option
-                    
+    
                             local optionName = Instance.new("TextLabel")
                             optionName.Name = "OptionName"
                             optionName.FontFace = Font.new(
@@ -2382,6 +2538,7 @@
                                 Enum.FontStyle.Normal
                             )
                             optionName.Text = v
+                            optionName.RichText = true
                             optionName.TextColor3 = Color3.fromRGB(255, 255, 255)
                             optionName.TextSize = 13
                             optionName.TextTransparency = 0.5
@@ -2396,7 +2553,7 @@
                             optionName.BorderSizePixel = 0
                             optionName.Position = UDim2.fromScale(1.3e-07, 0.5)
                             optionName.Parent = option
-                    
+    
                             local optionUIListLayout = Instance.new("UIListLayout")
                             optionUIListLayout.Name = "OptionUIListLayout"
                             optionUIListLayout.Padding = UDim.new(0, 10)
@@ -2404,7 +2561,7 @@
                             optionUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
                             optionUIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
                             optionUIListLayout.Parent = option
-                    
+    
                             local checkmark = Instance.new("TextLabel")
                             checkmark.Name = "Checkmark"
                             checkmark.FontFace = Font.new(
@@ -2428,22 +2585,23 @@
                             checkmark.Position = UDim2.fromScale(1.3e-07, 0.5)
                             checkmark.Size = UDim2.fromOffset(-10, 0)
                             checkmark.Parent = option
-                    
+    
                             option.Parent = dropdownFrame
-                    
+    
                             dropdownFrame.Parent = dropdown
                             OptionObjs[v] = {
+                                Index = i,
                                 Button = option,
                                 NameLabel = optionName,
                                 Checkmark = checkmark
                             }
-                    
+    
                             local dropdownUIPadding = Instance.new("UIPadding")
                             dropdownUIPadding.Name = "DropdownUIPadding"
                             dropdownUIPadding.PaddingLeft = UDim.new(0, 15)
                             dropdownUIPadding.PaddingRight = UDim.new(0, 15)
                             dropdownUIPadding.Parent = dropdown
-                    
+    
                             local tweensettings = {
                                 duration = 0.2,
                                 easingStyle = Enum.EasingStyle.Quint,
@@ -2467,85 +2625,30 @@
                                     TextTransparency = tweensettings.transparencyOut
                                 })
                             }
-                            local function Toggle(optionName, State)
-                                local option = OptionObjs[optionName]
-                                if not option then return end
-                            
-                                local checkmark = option.Checkmark
-                                local optionNameLabel = option.NameLabel
-                            
-                                if State then
-                                    if Settings.Multi then
-                                        if not table.find(Selected, optionName) then
-                                            table.insert(Selected, optionName)
-                                        end
-                                    else
-                                        -- Deselect all other options
-                                        for name, opt in pairs(OptionObjs) do
-                                            if name ~= optionName then
-                                                Tween(opt.Checkmark, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
-                                                    Size = UDim2.new(checkmark.Size.X.Scale, tweensettings.checkSizeDecrease, checkmark.Size.Y.Scale, checkmark.Size.Y.Offset)
-                                                }):Play()
-                                                Tween(opt.NameLabel, TweenInfo.new(tweensettings.duration, tweensettings.easingStyle), {
-                                                    TextTransparency = tweensettings.transparencyOut
-                                                }):Play()
-                                                opt.Checkmark.TextTransparency = 1  -- Hide the other checkmarks
-                                            end
-                                        end
-                                        Selected = {optionName}  -- Set the selected option
-                                    end
-                                    -- Show checkmark and apply tweens
-                                    tweens.checkIn:Play()
-                                    tweens.nameIn:Play()
-                                    checkmark.TextTransparency = 0  -- Make sure checkmark is visible
-                                else
-                                    if Settings.Multi then
-                                        local idx = table.find(Selected, optionName)
-                                        if idx then
-                                            table.remove(Selected, idx)
-                                        end
-                                    else
-                                        Selected = {}  -- Clear selection if non-multi and unselected
-                                    end
-                                    -- Hide checkmark and apply tweens
-                                    tweens.checkOut:Play()
-                                    tweens.nameOut:Play()
-                                    checkmark.TextTransparency = 1  -- Hide checkmark
-                                end
-                            
-                                -- Update dropdown name based on selection
-                                if #Selected > 0 then
-                                    dropdownName.Text = Settings.Name .. " • " .. table.concat(Selected, ", ")
-                                else
-                                    dropdownName.Text = Settings.Name
-                                end
-                            end
-                            
-                            
+    
                             local isSelected = false
-                            if Settings.Multi then
-                                isSelected = Settings.Default[v] == true
-                            else
-                                isSelected = (Settings.Default == v) and true or false
+                            if Settings.Default then
+                                if Settings.Multi then
+                                    isSelected = Settings.Default[v] == true
+                                else
+                                    isSelected = (Settings.Default == v) and true or false
+                                end                        
                             end
-                    
-                            
-                    
-                    
+
                             Toggle(v, isSelected)
-                    
+    
                             local option = OptionObjs[v].Button
-                    
+    
                             option.MouseButton1Click:Connect(function()
                                 local isSelected = table.find(Selected, v) and true or false
                                 local newSelected = not isSelected
-                    
+    
                                 if Settings.Required and not newSelected and #Selected <= 1 then
                                     return
                                 end
-                    
+    
                                 Toggle(v, newSelected)
-                    
+    
                                 task.spawn(function()
                                     if Settings.Multi then
                                         local Return = {}
@@ -2561,55 +2664,33 @@
                                 end)
                             end)
                         end
-                    
-                    
+    
+    
                         local function CalculateDropdownSize()
                             local count = 0
                             for _,v in pairs(dropdownFrame:GetChildren()) do
-                                if v:IsA("TextButton") and v.Visible then
-                                    count += 1
-                                end
+                                if not v:IsA("UIComponent") and v.Visible then count += 1 end
                             end
-                            local searchBarHeight = searchbar.Visible and searchbar.Size.Y.Offset or 0
-                            local padding = dropdownFrameUIPadding.PaddingTop.Offset + dropdownFrameUIPadding.PaddingBottom.Offset
-                            local optionHeight = 30 -- Change this if options are taller
-                            local totalHeight = (optionHeight * count) + padding + searchBarHeight
-                            
-                            return totalHeight
+                            local calculationVals = {
+                                [1] = dropdown.AbsoluteSize.Y,
+                                [2] = dropdownFrameUIPadding.PaddingTop.Offset - dropdownFrameUIPadding.PaddingBottom.Offset,
+                                [3] = 30 * count
+                            }
+                            return calculationVals[1] + calculationVals[2] + calculationVals[3]
                         end
-                        
-                        local dropped = false
-                        local function ToggleDropdown()
-                            local defaultDropdownSize = 38 -- Default size when dropdown is closed
-                            local targetSize
-                        
-                            if not dropped then
-                                -- Open dropdown, calculate size dynamically
-                                targetSize = UDim2.new(1, 0, 0, CalculateDropdownSize())
-                                dropdownFrame.Visible = true
-                            else
-                                -- Close dropdown, set to default size
-                                targetSize = UDim2.new(1, 0, 0, defaultDropdownSize)
-                                dropdownFrame.Visible = false
-                            end
-                            
-                            dropdown:TweenSize(targetSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quint, 0.2, true)
-                            dropped = not dropped
-                        end
-                        
-                    
+    
                         local dropped = false
                         local function ToggleDropdown()
                             local defaultDropdownSize = 38
                             local isDropdownOpen = not dropped
                             local targetSize = isDropdownOpen and UDim2.new(1, 0, 0, CalculateDropdownSize()) or UDim2.new(1, 0, 0, defaultDropdownSize)
-                    
+    
                             local tween = Tween(dropdown, TweenInfo.new(0.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
                                 Size = targetSize
                             })
-                    
+    
                             tween:Play()
-                    
+    
                             if isDropdownOpen then
                                 dropdownFrame.Visible = true
                             else
@@ -2617,23 +2698,41 @@
                                     dropdownFrame.Visible = false
                                 end)
                             end
-                    
+    
                             dropped = isDropdownOpen
                         end
-                    
+    
                         interact.MouseButton1Click:Connect(ToggleDropdown)
+                        
                         function DropdownFunctions:UpdateName(New)
                             dropdownName.Text = New
                         end
+                        function DropdownFunctions:SetVisibility(State)
+                            dropdown.Visible = State
+                        end
+                        function DropdownFunctions:UpdateSelection(newSelection)
+                            if type(newSelection) == "number" then
+                                for option, data in pairs(OptionObjs) do
+                                    local isSelected = data.Index == newSelection
+                                    Toggle(option, isSelected)
+                                end
+                            elseif type(newSelection) == "table" then
+                                for option, data in pairs(OptionObjs) do
+                                    local isSelected = table.find(newSelection, option) ~= nil
+                                    Toggle(option, isSelected)
+                                end
+                            end
+                        end
+    
                         return DropdownFunctions
                     end
-
+                    
                     function SectionFunctions:Header(Settings)
                         local HeaderFunctions = {}
                         
                         local header = Instance.new("Frame")
                         header.Name = "Header"
-                        header.AutomaticSize = Enum.AutomaticSize.XY
+                        header.AutomaticSize = Enum.AutomaticSize.Y
                         header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         header.BackgroundTransparency = 1
                         header.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -2672,6 +2771,9 @@
                         function HeaderFunctions:UpdateName(New)
                             headerText.Text = New
                         end
+                        function HeaderFunctions:SetVisibility(State)
+                            header.Visible = State
+                        end
                         
                         return HeaderFunctions
                     end
@@ -2681,7 +2783,7 @@
                         
                         local label = Instance.new("Frame")
                         label.Name = "Label"
-                        label.AutomaticSize = Enum.AutomaticSize.XY
+                        label.AutomaticSize = Enum.AutomaticSize.Y
                         label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         label.BackgroundTransparency = 1
                         label.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -2714,6 +2816,9 @@
                         function LabelFunctions:UpdateName(New)
                             labelText.Text = New
                         end
+                        function LabelFunctions:SetVisibility(State)
+                            label.Visible = State
+                        end
                         
                         return LabelFunctions
                     end
@@ -2723,7 +2828,7 @@
     
                         local paragraph = Instance.new("Frame")
                         paragraph.Name = "Paragraph"
-                        paragraph.AutomaticSize = Enum.AutomaticSize.XY
+                        paragraph.AutomaticSize = Enum.AutomaticSize.Y
                         paragraph.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
                         paragraph.BackgroundTransparency = 1
                         paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -2784,6 +2889,9 @@
                         function ParagraphFunctions:UpdateBody(New)
                             paragraphBody.Text = New
                         end
+                        function ParagraphFunctions:SetVisibility(State)
+                            paragraph.Visible = State
+                        end
     
                         return ParagraphFunctions
                     end
@@ -2826,6 +2934,9 @@
                         function DividerFunctions:Remove()
                             divider:Destroy()
                         end
+                        function DividerFunctions:SetVisibility(State)
+                            divider.Visible = State
+                        end
                         
                         return DividerFunctions
                     end
@@ -2845,6 +2956,9 @@
     
                         function SpacerFunctions:Remove()
                             spacer:Destroy()
+                        end
+                        function SpacerFunctions:SetVisibility(State)
+                            spacer.Visible = State
                         end
     
                         return SpacerFunctions
@@ -3116,8 +3230,16 @@
             acrylicBlur = State
         end
     
-        local MenuKeybind = Settings.Keybind or Enum.KeyCode.RightControl
+        function WindowFunctions:GetState()
+            return windowState
+        end
         
+        function WindowFunctions:Unload()
+            macLib:Destroy()
+        end
+        
+        local MenuKeybind = Settings.Keybind or Enum.KeyCode.RightControl
+    
         local function ToggleMenu()
             local state = not WindowFunctions:GetState()
             WindowFunctions:SetState(state)
@@ -3127,26 +3249,18 @@
                 Lifetime = 5
             })
         end
-        
+    
         UserInputService.InputEnded:Connect(function(inp, gpe)
             if gpe then return end
             if inp.KeyCode == MenuKeybind then
                 ToggleMenu()
             end
         end)
-        
+    
         minimize.MouseButton1Click:Connect(ToggleMenu)
         exit.MouseButton1Click:Connect(function()
             macLib:Destroy()
         end)
-        
-        function WindowFunctions:Unload()
-            macLib:Destroy()
-        end
-    
-        function WindowFunctions:GetState()
-            return windowState
-        end
     
         function WindowFunctions:SetKeybind(Keycode)
             MenuKeybind = Keycode
@@ -3190,20 +3304,233 @@
         function WindowFunctions:GetUserInfoState(State)
             return showUserInfo
         end
+        
         function WindowFunctions:SetSize(Size)
             base.Size = Size
         end
         function WindowFunctions:GetSize(Size)
             return base.Size
         end
+        
+        function WindowFunctions:SetScale(Scale)
+            baseUIScale.Scale = Scale
+        end
+        function WindowFunctions:GetScale()
+            return baseUIScale.Scale
+        end
     
         windowState = true
     
         macLib.Enabled = false
+        
+        local assetList = {}
+        for _, assetId in pairs(assets) do
+            table.insert(assetList, assetId)
+        end
         ContentProvider:PreloadAsync(macLib:GetDescendants())
+        ContentProvider:PreloadAsync(assetList)
+        
         macLib.Enabled = true
     
         return WindowFunctions
+    end
+    
+    function MacLib:Demo()
+        local DemoWindow = MacLib:Window({
+            Title = "MacLib Demo",
+            Subtitle = "This is a subtitle.",
+            Size = UDim2.fromOffset(868, 650),
+            DragStyle = 1,
+            DisabledWindowControls = {},
+            ShowUserInfo = true,
+            Keybind = Enum.KeyCode.RightControl,
+            AcrylicBlur = true,
+        })
+    
+        local UIBlurToggle = DemoWindow:GlobalSetting({
+            Name = "UI Blur",
+            Default = DemoWindow:GetAcrylicBlurState(),
+            Callback = function(bool)
+                DemoWindow:SetAcrylicBlurState(bool)
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = (bool and "Enabled" or "Disabled") .. " UI Blur",
+                    Lifetime = 5
+                })
+            end,
+        })
+        local NotificationToggler = DemoWindow:GlobalSetting({
+            Name = "Notifications",
+            Default = DemoWindow:GetNotificationsState(),
+            Callback = function(bool)
+                DemoWindow:SetNotificationsState(bool)
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = (bool and "Enabled" or "Disabled") .. " Notifications",
+                    Lifetime = 5
+                })
+            end,
+        })
+        local ShowUserInfo = DemoWindow:GlobalSetting({
+            Name = "Show User Info",
+            Default = DemoWindow:GetUserInfoState(),
+            Callback = function(bool)
+                DemoWindow:SetUserInfoState(bool)
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = (bool and "Showing" or "Redacted") .. " User Info",
+                    Lifetime = 5
+                })
+            end,
+        })
+    
+        local TabGroup = DemoWindow:TabGroup()
+    
+        local Main = TabGroup:Tab({
+            Name = "Demo",
+            Image = "rbxassetid://18821914323"
+        })
+    
+        local MainSection = Main:Section({
+            Side = "Left"
+        })
+        
+        MainSection:Header({
+            Name = "Header #1"
+        })
+    
+        MainSection:Button({
+            Name = "Button",
+            Callback = function()
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = "Success!",
+                    Lifetime = 6,
+                    Style = "Confirm",
+                    Callback = function()
+                        print("Clicked Confirm!")
+                    end,
+                })
+            end,
+        })
+    
+        MainSection:Input({
+            Name = "Input",
+            Placeholder = "Input",
+            AcceptedCharacters = "All",
+            Callback = function(input)
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = "Successfully set input to " .. input
+                })
+            end,
+            onChanged = function(input)
+                print("Input is now ".. input)
+            end,
+        })
+    
+        MainSection:Slider({
+            Name = "Slider",
+            Default = 50,
+            Minimum = 0,
+            Maximum = 100,
+            DisplayMethod = "Percent",
+            Callback = function(Value)
+                print("Changed to ".. Value)
+            end,
+        })
+    
+        MainSection:Toggle({
+            Name = "Toggle",
+            Default = false,
+            Callback = function(value)
+                DemoWindow:Notify({
+                    Title = "MacLib Demo",
+                    Description = (value and "Enabled " or "Disabled ") .. "Toggle"
+                })
+            end,
+        })
+    
+        MainSection:Keybind({
+            Name = "Keybind",
+            Callback = function(binded)
+                DemoWindow:Notify({
+                    Title = "Demo Window",
+                    Description = "Pressed keybind - "..tostring(binded.Name),
+                    Lifetime = 3
+                })
+            end,
+            onBinded = function(bind)
+                DemoWindow:Notify({
+                    Title = "Demo Window",
+                    Description = "Successfully Binded Keybind to - "..tostring(bind.Name),
+                    Lifetime = 3
+                })
+            end,
+        })
+    
+        local Dropdown = MainSection:Dropdown({
+            Name = "Dropdown",
+            Multi = false,
+            Required = true,
+            Options = {
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                "Option 5",
+            },
+            Default = 1,
+            Callback = function(Value)
+                print("Dropdown changed: ".. Value)
+            end,
+        })
+    
+        local MultiDropdown = MainSection:Dropdown({
+            Name = "Multi Dropdown",
+            Search = true,
+            Multi = true,
+            Required = false,
+            Options = {
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                "Option 5",
+            },
+            Default = {"Option 1", "Option 3"},
+            Callback = function(Value)
+                local Values = {}
+                for Value, State in next, Value do
+                    table.insert(Values, Value)
+                end
+                print("Mutlidropdown changed:", table.concat(Values, ", "))
+            end,
+        })
+    
+        MainSection:Button({
+            Name = "Update Selection",
+            Callback = function()
+                Dropdown:UpdateSelection(4)
+                MultiDropdown:UpdateSelection({"Option 2", "Option 5"})
+            end,
+        })
+        
+        MainSection:Divider()
+        
+        MainSection:Header({
+            Name = "Header #2"
+        })
+        
+        MainSection:Label({
+            Name = "Label. Lorem ipsum odor amet, consectetuer adipiscing elit."
+        })
+        
+        MainSection:Paragraph({
+            Header = "Paragraph",
+            Body = "Paragraph body. Lorem ipsum odor amet, consectetuer adipiscing elit. Morbi tempus netus aliquet per velit est gravida."
+        })
+        Main:Select()
     end
     
     return MacLib
